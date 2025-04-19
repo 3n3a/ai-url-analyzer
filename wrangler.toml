@@ -5,9 +5,9 @@ compatibility_date = "2023-10-30"
 # AI binding
 [[ai_binding]]
 binding = "AI"
-service = "@cf/mistral/mistral-7b-instruct-v0.1"
+service = "@cf/meta/llama-3-8b-instruct"
 
 # Environment variables
-[vars]
+# [vars]
 # This is just a placeholder - set the actual key in the Cloudflare dashboard
-API_KEY = "your-api-key-placeholder"
+# API_KEY = "your-api-key-placeholder"

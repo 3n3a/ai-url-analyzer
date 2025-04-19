@@ -1,7 +1,3 @@
-import { createWorkersAI } from 'workers-ai-provider';
-import { generateObject } from 'ai';
-import { unknown, z } from 'zod';
-
 // Define the environment variables type
 type Env = {
   AI: any;
@@ -12,13 +8,31 @@ type RequestSchema = {
   url: string;
 };
 
-// Define the response schema
-const responseSchema = z.object({
-  url: z.string(),
-  title: z.string(),
-  summary: z.string().max(250),
-  tags: z.array(z.string())
-});
+const responseFormat = {
+  type: 'json_schema',
+  json_schema: {
+    type: 'object',
+    properties: {
+      title: {
+        type: 'string',
+      },
+      summary: {
+        type: 'string',
+      },
+      tags: {
+        type: 'array',
+        items: {
+          'type': 'string',
+        },
+      },
+    },
+    required: [
+      "title",
+      "summary",
+      "tags",
+    ],
+  },
+}
 
 // Helper class to extract meta data using HTMLRewriter
 class MetaHandler {
@@ -35,10 +49,6 @@ class MetaHandler {
     if (name && allowedNames.includes(name) && content) {
       this.metaTags[name] = content;
     }
-  }
-
-  text(text: Text) {
-
   }
 }
 
@@ -114,29 +124,29 @@ export default {
       // Create a prompt for the AI model
       const metadata = Object.entries(metaTags)
         .map(([key, value]) => `${key}: ${value}`)
-        .join('\n');
+        .join('; ');
 
-      const prompt = `
-I have a webpage with the following metadata:
-Title: ${title}
-${metadata}
+      const prompt = `I have a webpage with the following metadata: Title: ${title}; ${metadata}`;
 
-Based on this information, please:
-1. Generate an appropriate title for the page
-2. Write a concise summary (max 250 words) of what the page contains
-3. Provide relevant single-word tags that categorize the page content
+      // // Initialize Workers AI
+      // const workersai = createWorkersAI({ binding: env.AI })
+      // // Generate the analysis
+      // const result = await generateObject({
+      //   model: workersai('@cf/meta/llama-3-8b-instruct'),
+      //   prompt: prompt,
+      //   schema: responseSchema,
+      // })
 
-Return only the requested information in a structured format.
-`;
+      const chatOptions = {
+        messages: [
+          { role: 'system', content: 'You can generate webpage overviews in structured format. A user will provide a page title and metadata. You will then generate an appropriate title for the page. You will also write a concise summary (max 250 words) based on the page descirption. You will also provide relevant single-word tags that categorize the page.' },
+          { role: 'user', content: prompt }
+        ],
+        response_format: responseFormat,
+      };
+      const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', chatOptions)
 
-      // Initialize Workers AI
-      const workersai = createWorkersAI({ binding: env.AI })
-      // Generate the analysis
-      const result = await generateObject({
-        model: workersai('@cf/mistral/mistral-7b-instruct-v0.1'),
-        prompt: prompt,
-        schema: responseSchema,
-      })
+      console.log('ai response', JSON.stringify(result));
 
       // Prepare the final response
       const finalResponse = {
