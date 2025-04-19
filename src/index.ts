@@ -1,12 +1,18 @@
 // Define the environment variables type
 type Env = {
-  AI: any;
+  AI: Ai;
   API_KEY: string;
 };
 
 type RequestSchema = {
   url: string;
 };
+
+type ResponseSchema = {
+  title: string,
+  summary: string,
+  tags: string[],
+}
 
 const responseFormat = {
   type: 'json_schema',
@@ -127,16 +133,6 @@ export default {
         .join('; ');
 
       const prompt = `I have a webpage with the following metadata: Title: ${title}; ${metadata}`;
-
-      // // Initialize Workers AI
-      // const workersai = createWorkersAI({ binding: env.AI })
-      // // Generate the analysis
-      // const result = await generateObject({
-      //   model: workersai('@cf/meta/llama-3-8b-instruct'),
-      //   prompt: prompt,
-      //   schema: responseSchema,
-      // })
-
       const chatOptions = {
         messages: [
           { role: 'system', content: 'You can generate webpage overviews in structured format. A user will provide a page title and metadata. You will then generate an appropriate title for the page. You will also write a concise summary (max 250 words) based on the page descirption. You will also provide relevant single-word tags that categorize the page.' },
@@ -146,17 +142,14 @@ export default {
       };
       const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', chatOptions)
 
-      console.log('ai response', JSON.stringify(result));
+      const parsed: { response: ResponseSchema } = JSON.parse(JSON.stringify(result));
 
-      // Prepare the final response
-      const finalResponse = {
+      console.log('parsed', JSON.stringify(parsed))
+
+      return Response.json({
         url: url,
-        title: result.object.title,
-        summary: result.object.summary,
-        tags: result.object.tags
-      }
-
-      return Response.json(finalResponse);
+        ...parsed.response,
+      })
     } catch (error) {
       console.error('Error processing request:', error);
       return new Response(`Error processing request: ${(error as Error).message}`, { status: 500 });
