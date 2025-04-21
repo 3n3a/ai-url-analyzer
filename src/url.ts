@@ -3,7 +3,7 @@ import { extractMetaData } from "./metadata";
 
 export async function fetchPageInfo(url: string) {
     // Fetch the URL
-    const response = await fetch(url);
+    const response = await fetch(url, { redirect: 'follow' });
     if (!response.ok) {
         throw new WebError(`Failed to fetch URL: ${response.statusText}`, { status: 502 });
     }
