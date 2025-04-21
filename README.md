@@ -8,7 +8,7 @@ A powerful Cloudflare Worker that extracts and analyzes web page content using A
 
 - 🔐 Secure API key authentication
 - 🌐 Fetches and processes any HTML web page
-- 🤖 Uses Mistral 7B AI model to generate insightful analysis
+- 🤖 Uses AI model to generate insightful analysis
 - 📝 Produces concise summaries (max 250 words)
 - 🏷️ Auto-generates relevant tags for easy categorization
 - ⚡ Lightning fast processing via Cloudflare's edge network
@@ -35,58 +35,61 @@ A powerful Cloudflare Worker that extracts and analyzes web page content using A
 ### Installation
 
 1. Clone this repository:
+
    ```bash
-   git clone https://github.com/yourusername/url-analyzer.git
-   cd url-analyzer
+   git clone https://github.com/3n3a/ai-url-info.git
+   cd ai-url-info
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Generate a secure API key:
+
    ```bash
    openssl rand -hex 32
    ```
 
 4. Create a `.dev.vars` file for local development:
+
    ```
    API_KEY=your-generated-api-key
    ```
 
 5. Configure your `wrangler.toml`:
+
    ```toml
    name = "url-analyzer"
    main = "src/index.ts"
    compatibility_date = "2023-10-30"
 
-   [[ai_binding]]
+   [ai]
    binding = "AI"
-   service = "@cf/mistral/mistral-7b-instruct-v0.1"
-
-   [vars]
-   # Placeholder - real key will be set via Cloudflare dashboard or wrangler secrets
-   API_KEY = "placeholder-will-be-replaced"
    ```
 
 ### Development
 
 Start a local development server:
+
 ```bash
-wrangler dev
+npm run dev
 ```
 
 ### Deployment
 
 Deploy to Cloudflare:
+
 ```bash
-wrangler deploy
+npm run deploy
 ```
 
 Set your production API key as a secret:
+
 ```bash
-wrangler secret put API_KEY
+npx wrangler secret put API_KEY
 ```
 
 ## 📝 Usage
@@ -94,7 +97,7 @@ wrangler secret put API_KEY
 Send a POST request to your Worker URL:
 
 ```bash
-curl -X POST https://url-analyzer.<your-subdomain>.workers.dev \
+curl -X POST http://localhost:8787 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-api-key" \
   -d '{"url": "https://example.com"}'
@@ -103,15 +106,15 @@ curl -X POST https://url-analyzer.<your-subdomain>.workers.dev \
 ### Using with JavaScript
 
 ```javascript
-const response = await fetch('https://url-analyzer.<your-subdomain>.workers.dev', {
-  method: 'POST',
+const response = await fetch("http://localhost:8787", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json', 
-    'Authorization': 'Bearer your-api-key'
+    "Content-Type": "application/json",
+    Authorization: "Bearer your-api-key",
   },
   body: JSON.stringify({
-    url: 'https://example.com'
-  })
+    url: "https://example.com",
+  }),
 });
 
 const data = await response.json();
@@ -120,9 +123,9 @@ console.log(data);
 
 ## ⚙️ Configuration Options
 
-| Environment Variable | Description |
-|---------------------|-------------|
-| `API_KEY` | Secret key for authenticating API requests |
+| Environment Variable | Description                                |
+| -------------------- | ------------------------------------------ |
+| `API_KEY`            | Secret key for authenticating API requests |
 
 ## 🛠️ Technical Implementation
 
@@ -130,8 +133,6 @@ This project uses:
 
 - [Cloudflare Workers](https://workers.cloudflare.com/) for serverless edge execution
 - [Workers AI](https://developers.cloudflare.com/workers-ai/) for machine learning capabilities
-- [Mistral 7B](https://mistral.ai/) for text analysis and generation
-- [Zod](https://github.com/colinhacks/zod) for schema validation
 
 ## 📜 License
 
