@@ -53,6 +53,6 @@ export async function generateSummary(env: Env, url: string) {
         ],
         response_format: responseFormat,
     };
-    const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', chatOptions)
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', chatOptions)
     return result;
 }
